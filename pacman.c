@@ -18,12 +18,10 @@ int food = 0;
 int curr = 0;
 
 void save_game() {
-    FILE *file = fopen("D:/Games/saman.txt", "w");
+    FILE *file = fopen("D:/pacman.txt", "w");
     if (file != NULL) {
-        // ذخیره اطلاعات بازی
         fprintf(file, "%d %d %d %d %d\n", pacman_x, pacman_y, score, food, curr);
 
-        // ذخیره وضعیت صفحه بازی
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 fputc(board[i][j], file);
@@ -34,12 +32,13 @@ void save_game() {
 }
 
 int load_game() {
-    FILE *file = fopen("D:/Games/saman.txt", "r");
+    FILE *file = fopen("D:/pacman.txt", "r");
     if (file != NULL) {
-        // بارگذاری اطلاعات بازی
-        fscanf(file, "%d %d %d %d %d\n", &pacman_x, &pacman_y, &score, &food, &curr);
+        if (fscanf(file, "%d %d %d %d %d\n", &pacman_x, &pacman_y, &score, &food, &curr) != 5) {
+            fclose(file);
+            return 0; 
+        }
 
-        // بارگذاری وضعیت صفحه بازی
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 board[i][j] = fgetc(file);
@@ -149,11 +148,19 @@ int main() {
     char ch;
     int load = 0;
 
-    printf("Do you want to load the previous game? (Y/N): ");
-    ch = getch();
+    FILE *file = fopen("D:/pacman.txt", "r");
+    if (file != NULL) {
+        fseek(file, 0, SEEK_END); 
+        long file_size = ftell(file);
+        fclose(file);
 
-    if (ch == 'Y' || ch == 'y') {
-        load = load_game();
+        if (file_size > 0) {
+            printf("A saved game is found. Do you want to continue from the saved game? (Y/N): ");
+            ch = getch();
+            if (ch == 'Y' || ch == 'y') {
+                load = load_game();
+            }
+        }
     }
 
     if (!load) {
