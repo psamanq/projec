@@ -21,31 +21,34 @@ int prize = 0;
 int double_move = 0; 
 
 void save_game() {
-    FILE *file = fopen("D:/pacman.txt", "w");
+    FILE *file = fopen("D:/pacman.bin", "wb");
     if (file != NULL) {
-        fprintf(file, "%d %d %d %d %d %d\n", pacman_x, pacman_y, score, food, curr, prize);
+        fwrite(&pacman_x, sizeof(int), 1,file);
+        fwrite(&pacman_y, sizeof(int), 1,file);
+        fwrite(&score, sizeof(int), 1,file);
+        fwrite(&food, sizeof(int), 1,file);
+        fwrite(&curr, sizeof(int), 1,file);
+        fwrite(&prize, sizeof(int), 1,file);
 
         for (int i = 0; i < HEIGHT; i++) {
-            for (int j = 0; j < WIDTH; j++) {
-                fputc(board[i][j], file);
-            }
+           fwrite(board[i], sizeof(char), WIDTH,file);
         }
         fclose(file);
     }
 }
 
 int load_game() {
-    FILE *file = fopen("D:/pacman.txt", "r");
+    FILE *file = fopen("D:/pacman.bin", "rb");
     if (file != NULL) {
-        if (fscanf(file, "%d %d %d %d %d %d\n", &pacman_x, &pacman_y, &score, &food, &curr, &prize) != 6) {
-            fclose(file);
-            return 0; 
-        }
+        fread(&pacman_x,sizeof(int), 1,file);
+        fread(&pacman_y,sizeof(int), 1,file);
+        fread(&score,sizeof(int), 1,file);
+        fread(&food,sizeof(int), 1,file);
+        fread(&curr,sizeof(int), 1,file);
+        fread(&prize,sizeof(int), 1,file);
 
         for (int i = 0; i < HEIGHT; i++) {
-            for (int j = 0; j < WIDTH; j++) {
-                board[i][j] = fgetc(file);
-            }
+           fread(board[i], sizeof(char), WIDTH, file);
         }
 
         fclose(file);
@@ -168,7 +171,7 @@ int main() {
     char ch;
     int load = 0;
 
-    FILE *file = fopen("D:/pacman.txt", "r");
+    FILE *file = fopen("D:/pacman.bin", "r");
     if (file != NULL) {
         fseek(file, 0, SEEK_END); 
         long file_size = ftell(file);
