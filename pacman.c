@@ -9,6 +9,7 @@
 #define FOOD '.'
 #define EMPTY ' '
 #define DEMON 'X'
+#define BONUS '$'
 
 int res = 0;
 int score = 0;
@@ -16,11 +17,13 @@ int pacman_x, pacman_y;
 char board[HEIGHT][WIDTH];
 int food = 0;
 int curr = 0;
+int prize = 0;
+int double_move = 0; 
 
 void save_game() {
     FILE *file = fopen("D:/pacman.txt", "w");
     if (file != NULL) {
-        fprintf(file, "%d %d %d %d %d\n", pacman_x, pacman_y, score, food, curr);
+        fprintf(file, "%d %d %d %d %d %d\n", pacman_x, pacman_y, score, food, curr, prize);
 
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
@@ -34,7 +37,7 @@ void save_game() {
 int load_game() {
     FILE *file = fopen("D:/pacman.txt", "r");
     if (file != NULL) {
-        if (fscanf(file, "%d %d %d %d %d\n", &pacman_x, &pacman_y, &score, &food, &curr) != 5) {
+        if (fscanf(file, "%d %d %d %d %d %d\n", &pacman_x, &pacman_y, &score, &food, &curr, &prize) != 6) {
             fclose(file);
             return 0; 
         }
@@ -73,7 +76,7 @@ void initialize() {
         }
     }
 
-    int val = 5;
+     int val = 5;
     while (val--) {
         int row = (rand() % (HEIGHT + 1));
         for (int j = 3; j < WIDTH - 3; j++) {
@@ -83,14 +86,25 @@ void initialize() {
         }
     }
 
-    count = 10;
-    while (count != 0) {
+    int count_demons = 10;
+    while (count_demons != 0) {
         int i = (rand() % (HEIGHT + 1));
         int j = (rand() % (WIDTH + 1));
 
         if (board[i][j] != WALL && board[i][j] != PACMAN) {
             board[i][j] = DEMON;
-            count--;
+            count_demons--;
+        }
+    }
+
+    int count_BONUS = 1;
+    while (count_BONUS != 0) {
+        int i = (rand() % (HEIGHT + 1));
+        int j = (rand() % (WIDTH + 1));
+
+        if (board[i][j] != WALL && board[i][j] != PACMAN && board[i][j] != DEMON) {
+            board[i][j] = BONUS;
+            count_BONUS--;
         }
     }
 
@@ -100,7 +114,7 @@ void initialize() {
 
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
-            if (i % 2 == 0 && j % 2 == 0 && board[i][j] != WALL && board[i][j] != DEMON && board[i][j] != PACMAN) {
+            if (i % 2 == 0 && j % 2 == 0 && board[i][j] != WALL && board[i][j] != DEMON && board[i][j] != PACMAN && board[i][j] != BONUS) {
                 board[i][j] = FOOD;
                 food++;
             }
@@ -118,6 +132,9 @@ void draw() {
         printf("\n");
     }
     printf("Score: %d\n", score);
+    if (double_move) {
+        printf("Remaining double move: %d\n", prize);
+    }
 }
 
 void move(int move_x, int move_y) {
@@ -135,6 +152,9 @@ void move(int move_x, int move_y) {
             }
         } else if (board[y][x] == DEMON) {
             res = 1;
+        } else if (board[y][x] == BONUS) {
+            double_move = 1;
+            prize = 10;
         }
 
         board[pacman_y][pacman_x] = EMPTY;
@@ -198,23 +218,52 @@ int main() {
 
         ch = getch();
 
-        switch (ch) {
-            case 'w':
-                move(0, -1);
-                break;
-            case 's':
-                move(0, 1);
-                break;
-            case 'a':
-                move(-1, 0);
-                break;
-            case 'd':
-                move(1, 0);
-                break;
-            case 'q':
-                printf("Game Over! Your Score: %d\n", score);
-                save_game();
-                return 0;
+        if (double_move && prize > 0) {
+            switch (ch) {
+                case 'w':
+                    move(0, -1);
+                    move(0, -1);
+                    prize--;
+                    break;
+                case 's':
+                    move(0, 1);
+                    move(0, 1);
+                    prize--;
+                    break;
+                case 'a':
+                    move(-1, 0);
+                    move(-1, 0);
+                    prize--;
+                    break;
+                case 'd':
+                    move(1, 0);
+                    move(1, 0);  
+                    prize--;
+                    break;
+                case 'q':
+                    printf("Game Over! Your Score: %d\n", score);
+                    save_game();
+                    return 0;
+            }
+        } else {
+            switch (ch) {
+                case 'w':
+                    move(0, -1);
+                    break;
+                case 's':
+                    move(0, 1);
+                    break;
+                case 'a':
+                    move(-1, 0);
+                    break;
+                case 'd':
+                    move(1, 0);
+                    break;
+                case 'q':
+                    printf("Game Over! Your Score: %d\n", score);
+                    save_game();
+                    return 0;
+            }
         }
     }
 
