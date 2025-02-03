@@ -22,6 +22,7 @@ int food = 0;
 int curr = 0;
 int prize = 0;
 int double_move = 0;
+int initial_food = 0;
 
 typedef struct {
     int x, y;
@@ -99,6 +100,18 @@ void initialize() {
         }
     }
 
+    
+    int val = 5;
+    while (val--) {
+        int row = (rand() % (HEIGHT + 1));
+        for (int j = 3; j < WIDTH - 3; j++) {
+            if (board[row][j] != WALL && board[row][j] != PACMAN) {
+                board[row][j] = WALL;
+            }
+        }
+    }
+
+
     int count_demons = MAX_DEMONS;
     while (count_demons != 0) {
         int i = (rand() % HEIGHT);
@@ -141,11 +154,13 @@ void initialize() {
     board[pacman_y][pacman_x] = PACMAN;
 
     food = 0;
+    initial_food = 0;
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (i % 2 == 0 && j % 2 == 0 && board[i][j] != WALL && board[i][j] != DEMON && board[i][j] != ENEMY && board[i][j] != PACMAN && board[i][j] != BONUS) {
                 board[i][j] = FOOD;
                 food++;
+                initial_food++;
             }
         }
     }
@@ -160,7 +175,12 @@ void draw() {
         }
         printf("\n");
     }
+
     printf("Score: %d\n", score);
+    printf("Food Remaining: %d\n", food);
+    printf("Total Food Eaten: %d\n", curr);
+    printf("Total Food Count: %d\n", initial_food);
+
     if (double_move) {
         printf("Remaining double move: %d\n", prize);
     }
@@ -239,9 +259,6 @@ int main() {
         initialize();
     }
 
-    food -= 35;
-    int totalFood = food;
-
     printf("Use buttons for w(up), a(left), d(right), and s(down)\nAlso, Press q for quit\n");
     printf("Enter Y to continue: \n");
 
@@ -254,9 +271,6 @@ int main() {
     while (1) {
         draw();
         move_enemies();
-
-        printf("Total Food count: %d\n", totalFood);
-        printf("Total Food eaten: %d\n", curr);
 
         if (res == 1) {
             system("cls");
