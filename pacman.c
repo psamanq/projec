@@ -13,7 +13,7 @@
 #define BONUS '$'
 #define MAX_DEMONS 5
 #define MAX_ENEMIES 5
-#define MAX_ENEMIES_HARD 10 
+#define MAX_ENEMIES_HARD 10
 
 int res = 0;
 int score = 0;
@@ -21,8 +21,8 @@ int pacman_x, pacman_y;
 int food = 0;
 int curr = 0;
 int prize = 0;
-int double_move = 0;
 int initial_food = 0;
+int double_move = 0; 
 int game_mode = 0;
 
 typedef struct {
@@ -43,7 +43,13 @@ Enemy enemies[MAX_ENEMIES_HARD];
 Cell board[HEIGHT][WIDTH];
 
 void save_game() {
-    FILE *file = fopen("D:/pacman.bin", "wb");
+    FILE *file;
+    if (game_mode == 0) {
+        file = fopen("D:/pacman_normal.bin", "wb");
+    } else {
+        file = fopen("D:/pacman_hard.bin", "wb");
+    }
+
     if (file != NULL) {
         fwrite(&pacman_x, sizeof(int), 1, file);
         fwrite(&pacman_y, sizeof(int), 1, file);
@@ -53,7 +59,7 @@ void save_game() {
         fwrite(&prize, sizeof(int), 1, file);
 
         fwrite(demons, sizeof(Demon), MAX_DEMONS, file);
-        fwrite(enemies, sizeof(Enemy), (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD), file); 
+        fwrite(enemies, sizeof(Enemy), (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD), file);
 
         for (int i = 0; i < HEIGHT; i++) {
             fwrite(board[i], sizeof(Cell), WIDTH, file);
@@ -66,7 +72,13 @@ void save_game() {
 }
 
 int load_game() {
-    FILE *file = fopen("D:/pacman.bin", "rb");
+    FILE *file;
+    if (game_mode == 0) {
+        file = fopen("D:/pacman_normal.bin", "rb");
+    } else {
+        file = fopen("D:/pacman_hard.bin", "rb");
+    }
+
     if (file != NULL) {
         fread(&pacman_x, sizeof(int), 1, file);
         fread(&pacman_y, sizeof(int), 1, file);
@@ -76,7 +88,7 @@ int load_game() {
         fread(&prize, sizeof(int), 1, file);
 
         fread(demons, sizeof(Demon), MAX_DEMONS, file);
-        fread(enemies, sizeof(Enemy), (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD), file); 
+        fread(enemies, sizeof(Enemy), (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD), file);
 
         for (int i = 0; i < HEIGHT; i++) {
             fread(board[i], sizeof(Cell), WIDTH, file);
@@ -228,7 +240,7 @@ void move(int move_x, int move_y) {
 }
 
 void move_enemies() {
-    for (int i = 0; i < (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD); i++) { 
+    for (int i = 0; i < (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD); i++) {
         int direction = rand() % 4;
 
         int new_x = enemies[i].x;
@@ -265,7 +277,7 @@ int main() {
         game_mode = 0;
     }
 
-    FILE *file = fopen("D:/pacman.bin", "r");
+    FILE *file = fopen((game_mode == 0 ? "D:/pacman_normal.bin" : "D:/pacman_hard.bin"), "r");
     if (file != NULL) {
         fseek(file, 0, SEEK_END); 
         long file_size = ftell(file);
