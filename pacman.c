@@ -56,6 +56,9 @@ void save_game() {
         for (int i = 0; i < HEIGHT; i++) {
             fwrite(board[i], sizeof(Cell), WIDTH, file);
         }
+
+        fwrite(&initial_food, sizeof(int), 1, file); 
+
         fclose(file);
     }
 }
@@ -77,7 +80,12 @@ int load_game() {
             fread(board[i], sizeof(Cell), WIDTH, file);
         }
 
+        fread(&initial_food, sizeof(int), 1, file); 
+
         fclose(file);
+
+        food = initial_food - curr;
+
         return 1;
     }
     return 0;
@@ -314,16 +322,26 @@ int main() {
                     break;
                 case 'q':
                     save_game();
+                    printf("Game Over! Your Score: %d\n", score);
                     return 0;
             }
         } else {
             switch (ch) {
-                case 'w': move(0, -1); break;
-                case 's': move(0, 1); break;
-                case 'a': move(-1, 0); break;
-                case 'd': move(1, 0); break;
+                case 'w': 
+                move(0, -1); 
+                break;
+                case 's': 
+                move(0, 1); 
+                break;
+                case 'a': 
+                move(-1, 0); 
+                break;
+                case 'd': 
+                move(1, 0); 
+                break;
                 case 'q':
                     save_game();
+                    printf("Game Over! Your Score: %d\n", score);
                     return 0;
             }
         }
