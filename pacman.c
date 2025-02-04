@@ -13,6 +13,7 @@
 #define BONUS '$'
 #define MAX_DEMONS 5
 #define MAX_ENEMIES 5
+#define MAX_ENEMIES_HARD 10 
 
 int res = 0;
 int score = 0;
@@ -22,6 +23,7 @@ int curr = 0;
 int prize = 0;
 int double_move = 0;
 int initial_food = 0;
+int game_mode = 0;
 
 typedef struct {
     char type;
@@ -37,7 +39,7 @@ typedef struct {
 } Enemy;
 
 Demon demons[MAX_DEMONS];
-Enemy enemies[MAX_ENEMIES];
+Enemy enemies[MAX_ENEMIES_HARD];
 Cell board[HEIGHT][WIDTH];
 
 void save_game() {
@@ -51,7 +53,7 @@ void save_game() {
         fwrite(&prize, sizeof(int), 1, file);
 
         fwrite(demons, sizeof(Demon), MAX_DEMONS, file);
-        fwrite(enemies, sizeof(Enemy), MAX_ENEMIES, file);
+        fwrite(enemies, sizeof(Enemy), (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD), file); 
 
         for (int i = 0; i < HEIGHT; i++) {
             fwrite(board[i], sizeof(Cell), WIDTH, file);
@@ -74,7 +76,7 @@ int load_game() {
         fread(&prize, sizeof(int), 1, file);
 
         fread(demons, sizeof(Demon), MAX_DEMONS, file);
-        fread(enemies, sizeof(Enemy), MAX_ENEMIES, file);
+        fread(enemies, sizeof(Enemy), (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD), file); 
 
         for (int i = 0; i < HEIGHT; i++) {
             fread(board[i], sizeof(Cell), WIDTH, file);
@@ -137,7 +139,7 @@ void initialize() {
         }
     }
 
-    int count_enemies = MAX_ENEMIES;
+    int count_enemies = (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD);
     while (count_enemies != 0) {
         int i = (rand() % HEIGHT);
         int j = (rand() % WIDTH);
@@ -226,7 +228,7 @@ void move(int move_x, int move_y) {
 }
 
 void move_enemies() {
-    for (int i = 0; i < MAX_ENEMIES; i++) {
+    for (int i = 0; i < (game_mode == 0 ? MAX_ENEMIES : MAX_ENEMIES_HARD); i++) { 
         int direction = rand() % 4;
 
         int new_x = enemies[i].x;
@@ -251,6 +253,17 @@ void move_enemies() {
 int main() {
     char ch;
     int load = 0;
+
+    printf("Select Game Mode:\n");
+    printf("1. Normal\n");
+    printf("2. Hard\n");
+    printf("Enter choice (1 or 2): ");
+    ch = getch();
+    if (ch == '2') {
+        game_mode = 1;
+    } else {
+        game_mode = 0;
+    }
 
     FILE *file = fopen("D:/pacman.bin", "r");
     if (file != NULL) {
